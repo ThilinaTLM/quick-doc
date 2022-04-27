@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
 	"reflect"
 	"strconv"
@@ -79,11 +80,12 @@ func typeToScheme(t reflect.Type, value reflect.Value) *openapi3.Schema {
 		}
 	case reflect.Struct:
 		properties := make(map[string]*openapi3.SchemaRef)
-		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
-			v := value.Field(i)
-			properties[jsonName(field)] = &openapi3.SchemaRef{
-				Value: typeToScheme(field.Type, v),
+		for i := 0; i < value.NumField(); i++ {
+			_field := t.Field(i)
+			_value := value.Type().Field(i)
+			fmt.Println(_value)
+			properties[jsonName(_field)] = &openapi3.SchemaRef{
+				Value: typeToScheme(_field.Type, reflect.Value{}),
 			}
 		}
 		return &openapi3.Schema{
