@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
 	"reflect"
 	"strconv"
@@ -8,82 +9,87 @@ import (
 
 // Scheme is document data scheme configuration
 func Scheme(value interface{}) SchemeConfig {
-	t := reflect.TypeOf(value)
 	return SchemeConfig{
-		Type:  t,
-		Value: value,
-	}
-}
-
-// SchemeWithTitle is document data scheme configuration
-func SchemeWithTitle(value interface{}, title string) SchemeConfig {
-	t := reflect.TypeOf(value)
-	return SchemeConfig{
-		Title: title,
-		Type:  t,
-		Value: value,
+		Object: value,
 	}
 }
 
 type SchemeConfig struct {
-	Title string
-	Type  reflect.Type
-	Value interface{}
+	Object interface{}
 }
 
 func (sb *SchemeConfig) toOpenAPI() *openapi3.Schema {
-	var vo reflect.Value
-	if sb.Value != nil {
-		vo = reflect.ValueOf(sb.Value)
+	if sb.Object == nil {
+		return openapi3.NewSchema()
 	}
-	scheme := typeToScheme(sb.Type, vo)
-	scheme.Example = sb.Value
-	scheme.Title = sb.Title
+
+	_type := reflect.TypeOf(sb.Object)
+	_value := reflect.ValueOf(sb.Object)
+
+	scheme := convertToSchema(_type, _value)
+	scheme.Example = filterExampleObject(sb.Object, scheme)
 	return scheme
 }
 
-func getExampleValue(v interface{}) {
-
-}
-
-func typeToScheme(t reflect.Type, value reflect.Value) *openapi3.Schema {
-	if t == nil {
-		return openapi3.NewSchema()
-	}
+func convertToSchema(t reflect.Type, v reflect.Value) *openapi3.Schema {
 	switch t.Kind() {
+	case reflect.Interface:
+		if v.Interface() == nil {
+			return nil
+		}
+		return convertToSchema(v.Elem().Type(), v.Elem())
+	case reflect.Ptr:
+		if !v.IsValid() {
+			return convertToSchema(t.Elem(), reflect.Value{})
+		}
+		return convertToSchema(t.Elem(), v.Elem())
+	case reflect.Invalid:
+		return openapi3.NewSchema()
 	case reflect.Bool:
 		return &openapi3.Schema{
 			Type:    "boolean",
-			Example: value.Bool(),
+			Example: getExample(t, v),
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return &openapi3.Schema{
 			Type:    "integer",
-			Example: value.Int(),
+			Example: getExample(t, v),
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return &openapi3.Schema{
 			Type:    "integer",
 			Format:  "int64",
-			Example: value.Uint(),
+			Example: getExample(t, v),
 		}
 	case reflect.Float32, reflect.Float64:
 		return &openapi3.Schema{
 			Type:    "number",
-			Example: value.Float(),
+			Example: getExample(t, v),
 		}
 	case reflect.String:
 		return &openapi3.Schema{
 			Type:    "string",
-			Example: value.String(),
+			Example: getExample(t, v),
 		}
 	case reflect.Struct:
 		properties := make(map[string]*openapi3.SchemaRef)
 		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
-			v := value.Field(i)
-			properties[jsonName(field)] = &openapi3.SchemaRef{
-				Value: typeToScheme(field.Type, v),
+			_field := t.Field(i)
+			var _value reflect.Value
+			if v.IsValid() {
+				_value = v.Field(i)
+			} else {
+				_value = reflect.Value{}
+			}
+			if _field.Type.Kind() == reflect.Ptr && _value.IsNil() {
+				continue
+			}
+			_schema := convertToSchema(_field.Type, _value)
+			if _schema == nil {
+				continue
+			}
+			properties[jsonName(_field)] = &openapi3.SchemaRef{
+				Value: _schema,
 			}
 		}
 		return &openapi3.Schema{
@@ -91,35 +97,55 @@ func typeToScheme(t reflect.Type, value reflect.Value) *openapi3.Schema {
 			Properties: properties,
 		}
 	case reflect.Slice:
-		// TODO: support slice example value
+		// TODO: support slice example v
 		return &openapi3.Schema{
 			Type: "array",
 			Items: &openapi3.SchemaRef{
-				Value: typeToScheme(t.Elem(), reflect.Value{}),
+				Value: convertToSchema(t.Elem(), reflect.Value{}),
 			},
-			Example: value,
+			Example: v,
 		}
 	case reflect.Map:
 		properties := make(map[string]*openapi3.SchemaRef)
-		for _, key := range value.MapKeys() {
+		for _, key := range v.MapKeys() {
 			sKey, ok := isStringOrNumberKind(key)
 			if !ok {
 				panic("unsupported type as map key, only string or number is required")
 			}
-			val := value.MapIndex(key)
+			val := v.MapIndex(key)
 			properties[sKey] = &openapi3.SchemaRef{
-				Value: typeToScheme(val.Type(), val),
+				Value: convertToSchema(val.Type(), val),
 			}
 		}
 		return &openapi3.Schema{
 			Type:       "object",
 			Properties: properties,
 		}
-	case reflect.Interface:
-		return typeToScheme(value.Elem().Type(), value.Elem())
+
 	default:
 		panic("unsupported type")
 	}
+}
+
+func getExample(t reflect.Type, v reflect.Value) interface{} {
+	if v.Kind() == reflect.Invalid {
+		return nil
+	}
+
+	switch t.Kind() {
+	case reflect.Bool:
+		return v.Bool()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return v.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return v.Uint()
+	case reflect.Float32, reflect.Float64:
+		return v.Float()
+	case reflect.String:
+		return v.String()
+	}
+
+	return nil
 }
 
 func isStringOrNumberKind(k reflect.Value) (string, bool) {
@@ -139,4 +165,26 @@ func jsonName(t reflect.StructField) string {
 		return tag
 	}
 	return t.Name
+}
+
+func filterExampleObject(v interface{}, schema *openapi3.Schema) *map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+
+	// convert to map
+	_json, err := json.Marshal(v)
+	if err != nil {
+		return nil
+	}
+	var _map map[string]interface{}
+	err = json.Unmarshal([]byte(_json), &_map)
+
+	// remove null fields
+	for k, v := range _map {
+		if v == nil {
+			delete(_map, k)
+		}
+	}
+	return &_map
 }
