@@ -5,32 +5,22 @@ import (
 	"git.mytaxi.lk/pickme/delivery-services/quick-doc/doc"
 	"github.com/gorilla/mux"
 	"net/http"
-	"reflect"
 )
 
 type Project struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Description2 string `json:"description2"`
 }
 
 type ReqUserAdd struct {
-	//Name    string      `json:"name"`
-	//Age     int         `json:"age"`
-	Project interface{} `json:"project"`
+	Name    string   `json:"name"`
+	Age     int      `json:"age"`
+	Project *Project `json:"project"`
 }
 
 func main() {
-	Test()
-}
-
-func Test() {
-	obj := ReqUserAdd{}
-	// print obj fields
-	t := reflect.TypeOf(obj)
-	v := reflect.ValueOf(obj)
-	for i := 0; i < t.NumField(); i++ {
-		fmt.Println(t.Field(i).Name, v.Field(i).Type())
-	}
+	Doc()
 }
 
 func Doc() {
@@ -50,9 +40,13 @@ func Doc() {
 	apiDoc.Post(doc.Endpoint{
 		Path:        "/api/user",
 		Description: "Create a new user",
-		Tags:        []string{"user"},
-		RequestBody: doc.ReqBodyJson(ReqUserAdd{}),
-		Responses:   doc.Resp(doc.RespSuccess("User created successfully", nil)),
+		Tags:        doc.Tags("User"),
+		RequestBody: doc.ReqBodyJson(&ReqUserAdd{
+			Project: nil,
+		}),
+		Responses: doc.Resp(
+			doc.RespSuccess("User created successfully", nil),
+		),
 	})
 
 	compiledDoc, err := apiDoc.Compile()
