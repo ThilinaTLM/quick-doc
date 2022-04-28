@@ -1,4 +1,4 @@
-module git.mytaxi.lk/pickme/delivery-services/quick-doc
+module github.com/ThilinaTLM/quick-doc
 
 go 1.17
 

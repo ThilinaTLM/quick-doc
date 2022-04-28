@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"git.mytaxi.lk/pickme/delivery-services/quick-doc/doc"
+	"github.com/ThilinaTLM/quick-doc/doc"
 	"github.com/gorilla/mux"
 	"net/http"
 )
