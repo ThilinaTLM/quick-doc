@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-// Schema Property Type
+// PropType Schema Property Type
 type PropType string
 
 const (
