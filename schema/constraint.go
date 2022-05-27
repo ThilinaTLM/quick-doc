@@ -1,6 +1,6 @@
 package schema
 
-// Constraint types
+// ConstraintType Constraint types
 type ConstraintType string
 
 const (
