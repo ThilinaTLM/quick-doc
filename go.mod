@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/getkin/kin-openapi v0.94.0
-	github.com/gorilla/mux v1.8.0
 )
 
 require (

@@ -1,4 +1,4 @@
-package doc
+package qdoc
 
 import "github.com/getkin/kin-openapi/openapi3"
 
@@ -12,7 +12,7 @@ const (
 
 type Parameter struct {
 	Name        string
-	Scheme      SchemeConfig
+	Scheme      SchemaConfig
 	Description string
 	Required    bool
 	Loc         ParamType
@@ -45,7 +45,7 @@ func QueryParams(params ...Parameter) Parameters {
 }
 
 // RequiredParam returns a Parameter with the given name and value,
-func RequiredParam(name string, value SchemeConfig) Parameter {
+func RequiredParam(name string, value SchemaConfig) Parameter {
 	return Parameter{
 		Name:     name,
 		Scheme:   value,
@@ -54,7 +54,7 @@ func RequiredParam(name string, value SchemeConfig) Parameter {
 }
 
 // OptionalParam returns a Parameter with the given name and value,
-func OptionalParam(name string, value SchemeConfig) Parameter {
+func OptionalParam(name string, value SchemaConfig) Parameter {
 	return Parameter{
 		Name:     name,
 		Scheme:   value,

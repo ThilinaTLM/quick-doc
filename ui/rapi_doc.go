@@ -14,8 +14,8 @@ func RapiDocHTML(config Config) string {
 			  <body>
 				<rapi-doc
 				  spec-url = "%s"
-				> </rapi-apiDoc>
+				> </rapi-doc>
 			  </body>
 			</html>
-		`, config.Title, config.Theme)
+		`, config.Title, config.SpecUrl)
 }

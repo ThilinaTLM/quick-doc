@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/ThilinaTLM/quick-doc/doc"
-	"github.com/gorilla/mux"
+	"github.com/ThilinaTLM/quick-doc/qdoc"
+	"github.com/ThilinaTLM/quick-doc/ui"
 	"net/http"
 )
 
@@ -24,42 +24,47 @@ func main() {
 }
 
 func Doc() {
-	apiDoc := doc.NewDoc(doc.Config{
-		Enabled:     true,
+	doc := qdoc.NewDoc(qdoc.Config{
 		Title:       "Quick Doc Demo",
-		Description: "Quick doc demo API documentation example",
+		Description: "Quick Doc demo API documentation example",
 		Version:     "1.0.0",
-		Servers:     []string{"http://localhost:8080"},
-		AuthTypes:   doc.AuthTypesBearer(),
-		SpecUrl:     "/api/doc/json",
-		UiEnabled:   true,
-		UiUrl:       "/api/doc/ui",
-		UiTheme:     doc.UI_THEME_SWAGGER_UI,
-	})
-
-	apiDoc.Post(doc.Endpoint{
-		Path:        "/api/user",
-		Description: "Create a new user",
-		Tags:        doc.Tags("User"),
-		RequestBody: doc.ReqBodyJson(&ReqUserAdd{
-			Project: nil,
-		}),
-		Responses: doc.Resp(
-			doc.RespSuccess("User created successfully", nil),
+		Servers: qdoc.Servers(
+			"http://localhost:8080",
 		),
+		SpecUrl: "/doc/json",
+
+		UiEnabled: true,
+		UiUrl:     "/doc/ui",
+		UiTheme:   ui.SWAGGER_UI,
+		UiDynamic: true,
 	})
 
-	compiledDoc, err := apiDoc.Compile()
+	doc.Post(&qdoc.Endpoint{
+		Path: "/doc/user",
+		Desc: "Create a new user",
+		ReqBody: qdoc.ReqJson(&ReqUserAdd{
+			Name: "Student 1",
+			Age:  16,
+			Project: &Project{
+				Name:        "Volunteer Project",
+				Description: "This is a volunteer project",
+			},
+		}),
+		RespSet: qdoc.RespSet{
+			Success: qdoc.ResJson("User creation success", nil),
+		},
+	}).Tag("User").WithBearerAuth()
+
+	cd, err := doc.Compile()
 	if err != nil {
 		panic(err)
 	}
 
-	router := mux.NewRouter()
-	compiledDoc.ServeHttp(router)
+	s := cd.ServeMux()
 
 	fmt.Println("Server is running on port 8080")
-	fmt.Println("Swagger UI: http://localhost:8080/api/doc/ui")
-	err = http.ListenAndServe(":8080", router)
+	fmt.Println("Swagger UI: http://localhost:8080/doc/ui")
+	err = http.ListenAndServe(":8080", s)
 	if err != nil {
 		return
 	}

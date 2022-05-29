@@ -2,23 +2,22 @@ package ui
 
 import "fmt"
 
-type Type string
+type Theme string
 
 const (
-	RAPI_DOC   Type = "RAPI_DOC"
-	SWAGGER_UI Type = "SWAGGER_UI"
+	RAPI_DOC   Theme = "rapi-doc"
+	SWAGGER_UI Theme = "swagger-ui"
 )
 
 type Config struct {
-	Type    Type
-	Theme   string
+	Theme   Theme
 	Title   string
 	SpecUrl string
 }
 
 func (c *Config) Validate() error {
-	if c.Type != RAPI_DOC && c.Type != SWAGGER_UI {
-		return fmt.Errorf("invalid type: %s", c.Type)
+	if c.Theme != RAPI_DOC && c.Theme != SWAGGER_UI {
+		return fmt.Errorf("invalid type: %s", c.Theme)
 	}
 	if c.Title == "" {
 		return fmt.Errorf("title is required")
@@ -35,10 +34,10 @@ func HTML(config Config) (string, error) {
 		return "", err
 	}
 
-	if config.Type == RAPI_DOC {
+	if config.Theme == RAPI_DOC {
 		return RapiDocHTML(config), nil
-	} else if config.Type == SWAGGER_UI {
+	} else if config.Theme == SWAGGER_UI {
 		return SwaggerUiHTML(config), nil
 	}
-	return "", fmt.Errorf("invalid type: %s", config.Type)
+	return "", fmt.Errorf("invalid type: %s", config.Theme)
 }

@@ -29,7 +29,7 @@ type LogEntry struct {
 }
 
 func Test_TypeString(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema("Test User")
 
@@ -48,7 +48,7 @@ func Test_TypeString(t *testing.T) {
 }
 
 func Test_TypeStringPointer(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	str := "Test User"
 	got, err := sb.GetSchema(&str)
@@ -68,7 +68,7 @@ func Test_TypeStringPointer(t *testing.T) {
 }
 
 func Test_TypeBoolean(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(true)
 
@@ -87,7 +87,7 @@ func Test_TypeBoolean(t *testing.T) {
 }
 
 func Test_TypeInteger(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(10)
 
@@ -106,7 +106,7 @@ func Test_TypeInteger(t *testing.T) {
 }
 
 func Test_TypeStruct_1(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(UserAccount1{
 		Name: "Test User",
@@ -159,7 +159,7 @@ func Test_TypeStruct_1(t *testing.T) {
 }
 
 func Test_TypeStruct_2(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(UserAccount2{
 		Name: "Test User",
@@ -209,7 +209,7 @@ func Test_TypeStruct_2(t *testing.T) {
 }
 
 func Test_TypeStruct_3(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(UserAccount3{
 		Name: "Test User",
@@ -262,7 +262,7 @@ func Test_TypeStruct_3(t *testing.T) {
 }
 
 func Test_TypeStruct_4(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema(UserAccount3{
 		Name: "Test User",
@@ -296,7 +296,7 @@ func Test_TypeStruct_4(t *testing.T) {
 }
 
 func Test_TypeSlice(t *testing.T) {
-	sb := NewBuilder()
+	sb := NewBuilderDefault()
 
 	got, err := sb.GetSchema([]int{1, 2, 3})
 

@@ -1,4 +1,4 @@
-package doc
+package qdoc
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"

@@ -6,12 +6,18 @@ import (
 	"strings"
 )
 
-func NewBuilder() Builder {
+func NewBuilderDefault() Builder {
 	return Builder{
 		Options: &Options{
 			ExploreNilStruct: true,
 			PreferJsonTag:    true,
 		},
+	}
+}
+
+func NewBuilder(opts *Options) Builder {
+	return Builder{
+		Options: opts,
 	}
 }
 
@@ -63,6 +69,9 @@ func (b *Builder) inspect(t reflect.Type, v reflect.Value) (*Property, error) {
 			Value: b.valueString(v),
 		}, nil
 	case reflect.Struct:
+		if !v.IsValid() && !b.Options.ExploreNilStruct {
+			return nil, nil
+		}
 		props, err := b.inspectStruct(t, v)
 		if err != nil {
 			return nil, err
