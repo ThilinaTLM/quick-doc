@@ -6,27 +6,32 @@ import (
 )
 
 // Schema is document data scheme configuration
-func Schema(value interface{}) SchemaConfig {
-	return SchemaConfig{
+func (d *Doc) Schema(value interface{}) *SchemaConfig {
+	sc := SchemaConfig{
 		Object: value,
 		builder: schema.NewBuilder(&schema.Options{
 			ExploreNilStruct: false,
 			PreferJsonTag:    true,
 		}),
 	}
+	d.schemas = append(d.schemas, &sc)
+	return &sc
 }
 
 type SchemaConfig struct {
-	Object  interface{}
-	builder schema.Builder
+	Object    interface{}
+	builder   schema.Builder
+	component bool
 }
 
-func (sb *SchemaConfig) toOpenAPI() *openapi3.Schema {
-	prop, err := sb.builder.GetSchema(sb.Object)
+func (sc *SchemaConfig) toOpenAPI() *openapi3.Schema {
+	if sc == nil {
+		return openapi3.NewSchema()
+	}
+	prop, err := sc.builder.GetSchema(sc.Object)
 	if err != nil {
 		return nil
 	}
-
 	return propToOpenAPI(prop)
 }
 

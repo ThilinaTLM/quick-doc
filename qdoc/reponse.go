@@ -17,7 +17,7 @@ var HTTP_ISE = HttpStatus(500)
 type Response struct {
 	Status       HttpStatus
 	ContentTypes []ContentType
-	Schema       SchemaConfig
+	Schema       *SchemaConfig
 	Description  string
 }
 
@@ -70,10 +70,10 @@ func (r *RespSet) collectToMap() map[HttpStatus]*Response {
 }
 
 // ResJson returns a Response with a json content type
-func ResJson(desc string, value interface{}) *Response {
+func ResJson(desc string, sc *SchemaConfig) *Response {
 	return &Response{
 		ContentTypes: []ContentType{CONTENT_TYPE_JSON},
-		Schema:       Schema(value),
+		Schema:       sc,
 		Description:  desc,
 	}
 }

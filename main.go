@@ -30,26 +30,29 @@ func Doc() {
 		Version:     "1.0.0",
 		Servers: qdoc.Servers(
 			"http://localhost:8080",
+			"http://dev.quickdoc.com",
 		),
-		SpecUrl: "/doc/json",
+		SpecPath: "/doc/json",
 
-		UiEnabled: true,
-		UiUrl:     "/doc/ui",
-		UiTheme:   ui.SWAGGER_UI,
-		UiDynamic: true,
+		UiConfig: qdoc.UiConfig{
+			Enabled:      true,
+			Path:         "/doc/ui",
+			DefaultTheme: ui.SWAGGER_UI,
+			ThemeByQuery: false,
+		},
 	})
 
 	doc.Post(&qdoc.Endpoint{
 		Path: "/doc/user",
 		Desc: "Create a new user",
-		ReqBody: qdoc.ReqJson(&ReqUserAdd{
+		ReqBody: qdoc.ReqJson(doc.Schema(ReqUserAdd{
 			Name: "Student 1",
 			Age:  16,
 			Project: &Project{
 				Name:        "Volunteer Project",
 				Description: "This is a volunteer project",
 			},
-		}),
+		})),
 		RespSet: qdoc.RespSet{
 			Success: qdoc.ResJson("User creation success", nil),
 		},

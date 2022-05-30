@@ -56,16 +56,16 @@ func serveUiDynamic(defaultTheme ui.Theme, htmlMap map[ui.Theme]string) func(htt
 
 func (cd *CompiledDoc) ServeMux() *http.ServeMux {
 	s := http.NewServeMux()
-	s.HandleFunc(cd.config.SpecUrl, serveJson(cd.Json))
+	s.HandleFunc(cd.config.SpecPath, serveJson(cd.Json))
 
-	if cd.config.UiEnabled {
-		if cd.config.UiDynamic {
+	if cd.config.UiConfig.Enabled {
+		if cd.config.UiConfig.ThemeByQuery {
 			var htmlMap = make(map[ui.Theme]string)
 			for _, theme := range []ui.Theme{ui.SWAGGER_UI, ui.RAPI_DOC} {
 				html, err := ui.HTML(ui.Config{
 					Theme:   theme,
 					Title:   cd.config.Title,
-					SpecUrl: cd.config.SpecUrl,
+					SpecUrl: cd.config.SpecPath,
 				})
 				if err != nil {
 					panic(err)
@@ -73,17 +73,17 @@ func (cd *CompiledDoc) ServeMux() *http.ServeMux {
 				htmlMap[theme] = html
 			}
 
-			s.HandleFunc(cd.config.UiUrl, serveUiDynamic(cd.config.UiTheme, htmlMap))
+			s.HandleFunc(cd.config.UiConfig.Path, serveUiDynamic(cd.config.UiConfig.DefaultTheme, htmlMap))
 		} else {
 			html, err := ui.HTML(ui.Config{
-				Theme:   cd.config.UiTheme,
+				Theme:   cd.config.UiConfig.DefaultTheme,
 				Title:   cd.config.Title,
-				SpecUrl: cd.config.SpecUrl,
+				SpecUrl: cd.config.SpecPath,
 			})
 			if err != nil {
 				panic(err)
 			}
-			s.HandleFunc(cd.config.UiUrl, serveUi(html))
+			s.HandleFunc(cd.config.UiConfig.Path, serveUi(html))
 		}
 
 	}

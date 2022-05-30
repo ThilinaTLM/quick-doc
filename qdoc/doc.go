@@ -22,6 +22,13 @@ const (
 	CONTENT_TYPE_FILE      = ContentType("application/octet-stream")
 )
 
+type UiConfig struct {
+	Enabled      bool
+	Path         string
+	DefaultTheme ui.Theme
+	ThemeByQuery bool
+}
+
 // Config API Doc configuration
 type Config struct {
 	Title       string
@@ -29,12 +36,9 @@ type Config struct {
 	Version     string
 	Servers     []string
 	AuthConf    *AuthConf
-	SpecUrl     string
+	SpecPath    string
 
-	UiEnabled bool
-	UiUrl     string
-	UiTheme   ui.Theme
-	UiDynamic bool
+	UiConfig UiConfig
 }
 
 type Endpoint struct {
@@ -57,20 +61,21 @@ type Endpoint struct {
 type Doc struct {
 	config    Config
 	endpoints []*Endpoint
+	schemas   []*SchemaConfig
 }
 
 func NewDoc(config Config) *Doc {
 
-	if config.SpecUrl == "" {
-		config.SpecUrl = "/qdoc/openapi.json"
+	if config.SpecPath == "" {
+		config.SpecPath = "/doc/openapi.json"
 	}
 
-	if config.UiEnabled {
-		if config.UiTheme == "" {
-			config.UiTheme = ui.SWAGGER_UI
+	if config.UiConfig.Enabled {
+		if config.UiConfig.DefaultTheme == "" {
+			config.UiConfig.DefaultTheme = ui.SWAGGER_UI
 		}
-		if config.UiUrl == "" {
-			config.UiUrl = "/qdoc/ui"
+		if config.UiConfig.Path == "" {
+			config.UiConfig.Path = "/doc/ui"
 		}
 	}
 

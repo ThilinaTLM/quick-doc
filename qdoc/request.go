@@ -4,32 +4,32 @@ import "github.com/getkin/kin-openapi/openapi3"
 
 type RequestBody struct {
 	ContentTypes []ContentType
-	Schema       SchemaConfig
+	Schema       *SchemaConfig
 	Required     bool
 }
 
-func ReqBody(value interface{}) func(...ContentType) RequestBody {
+func ReqBody(sc *SchemaConfig) func(...ContentType) RequestBody {
 	return func(contentTypes ...ContentType) RequestBody {
 		return RequestBody{
 			ContentTypes: contentTypes,
-			Schema:       Schema(value),
+			Schema:       sc,
 			Required:     true,
 		}
 	}
 }
 
-func ReqJson(value interface{}) RequestBody {
+func ReqJson(sc *SchemaConfig) RequestBody {
 	return RequestBody{
 		ContentTypes: []ContentType{CONTENT_TYPE_JSON},
-		Schema:       Schema(value),
+		Schema:       sc,
 		Required:     true,
 	}
 }
 
-func ReqBodyForm(value interface{}) RequestBody {
+func ReqBodyForm(sc *SchemaConfig) RequestBody {
 	return RequestBody{
 		ContentTypes: []ContentType{CONTENT_TYPE_FORM},
-		Schema:       Schema(value),
+		Schema:       sc,
 		Required:     true,
 	}
 }
