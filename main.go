@@ -53,6 +53,10 @@ func Doc() {
 				Description: "This is a volunteer project",
 			},
 		})),
+		Headers: qdoc.Headers(
+			qdoc.RequiredParam("app-name", doc.Schema("andorid")),
+			qdoc.OptionalParam("app-name2", nil),
+		),
 		RespSet: qdoc.RespSet{
 			Success: qdoc.ResJson("User creation success", nil),
 		},

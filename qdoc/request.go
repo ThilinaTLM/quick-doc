@@ -26,7 +26,7 @@ func ReqJson(sc *SchemaConfig) RequestBody {
 	}
 }
 
-func ReqBodyForm(sc *SchemaConfig) RequestBody {
+func ReqForm(sc *SchemaConfig) RequestBody {
 	return RequestBody{
 		ContentTypes: []ContentType{CONTENT_TYPE_FORM},
 		Schema:       sc,
